@@ -1,5 +1,4 @@
-#define WR_SVALUE _IOW('a','a', int32_t*)
-#define WR_AVALUE _IOW('a','b', char*)
+#define WR_PID _IOW('a','a', int32_t*)
 #define RD_MY_PAGE _IOR('a','c', struct my_page*)
 #define RD_MY_SYSCALL_INFO _IOR('a','d', struct my_syscall_info*)
 

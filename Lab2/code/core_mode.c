@@ -77,9 +77,6 @@ static int driver_close(struct inode *inode, struct file *file){
 
 // This function will be called when we write IOCTL on the Device file
 static long driver_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
-	struct path path;
-	const int buffer = BUFFER;
-	char path_arg[buffer];
 	struct my_page mp;
 	struct my_syscall_info msi;
 	struct page* page;
@@ -87,13 +84,9 @@ static long driver_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct mm_struct* mm;
 	struct vm_area_struct* vm;
 	switch(cmd) {
-		case WR_SVALUE:
+		case WR_PID:
 			if(copy_from_user(&pid, (int*) arg, sizeof(pid))) pr_err("Data write error!\n");
 			pr_info("Pid = %d\n", pid);
-			break;
-		case WR_AVALUE:
-			copy_from_user(path_arg, (char*) arg, buffer);
-			kern_path(path_arg, LOOKUP_FOLLOW, &path);
 			break;
 		case RD_MY_PAGE:
 			task = get_pid_task(find_get_pid(pid), PIDTYPE_PID);

@@ -30,12 +30,11 @@ static void print_page(struct my_page* mp) {
 
 int main(int argc, char *argv[]) {
 	int fd;
-	if(argc < 3) {
-		printf("The program needs 2 arguments - a path to file and pid!\n");
+	if(argc < 2) {
+		printf("The program needs an argument - a pid!\n");
 		return -1;
 	}
 	int32_t pid = atoi(argv[1]);
-	char* path = argv[2];
 	printf("\nOpening a driver...\n");
 	fd = open("/dev/etc_device", O_WRONLY);
 	if(fd < 0) {
@@ -45,14 +44,12 @@ int main(int argc, char *argv[]) {
 	struct my_page mp;
 	struct my_syscall_info msi;
 	// Writing a pid to driver
-	ioctl(fd, WR_SVALUE, (int32_t*) &pid);
-	// Writing a path to driver
-	ioctl(fd, WR_AVALUE, path);
-	// Reading a value from driver
+	ioctl(fd, WR_PID, (int32_t*) &pid);
+	// Reading my_page from driver
 	ioctl(fd, RD_MY_PAGE, &mp);
 	print_line();
 	print_page(&mp);
-	// Reading a value from driver
+	// Reading my_syscall_info from driver
 	ioctl(fd, RD_MY_SYSCALL_INFO, &msi);
 	print_line();
 	print_my_syscall_info(&msi);

@@ -18,18 +18,17 @@ MODULE_AUTHOR("Kirill Vorobyev");
 MODULE_DESCRIPTION("My ioctl driver");
 MODULE_VERSION("1.0");
 
-#define MYMAJOR 28
-#define BUFFER 1024
+const int MYMAJOR = 28;
 
 int pid = 0;
 
-static void print_my_page(struct my_page* mp) {
+static void print_my_page(const struct my_page* mp) {
 	printk("\nPage:\n");
 	printk("flags: %lu\n", mp->flags);
 	printk("Virtual address: %ld, Page address: %p\n", mp->vm_address, mp->mapping);
 }
 
-static void print_my_syscall_info(struct my_syscall_info* msi) {
+static void print_my_syscall_info(const struct my_syscall_info* msi) {
 	printk("\nSyscall_info:\n");
 	printk("sp %lld\n", msi->sp);
 	printk("nr %d\n", msi->data.nr);
@@ -48,7 +47,7 @@ static struct page* get_page_by_mm_and_address(struct mm_struct* mm, long addres
 	pud_t* pud;
 	pmd_t* pmd;
 	pte_t* pte;
-	struct page* page = NULL;
+	struct page* page;
 	pgd = pgd_offset(mm, address);
 	if (!pgd_present(*pgd)) return NULL;
 	p4d = p4d_offset(pgd, address);
@@ -61,18 +60,6 @@ static struct page* get_page_by_mm_and_address(struct mm_struct* mm, long addres
 	if (!pte_present(*pte)) return NULL;
 	page = pte_page(*pte);
 	return page;
-}
-
-static int driver_open(struct inode *inode, struct file *file){
-        pr_info("Device file has been opened\n");
-        return 0;
-}
-
-
-// This function will be called when we close the Device file
-static int driver_close(struct inode *inode, struct file *file){
-        pr_info("Device file has been closed...\n");
-        return 0;
 }
 
 // This function will be called when we write IOCTL on the Device file
@@ -123,14 +110,15 @@ static long driver_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			print_my_syscall_info(&msi);
 			if(copy_to_user((struct my_syscall_info*) arg, &msi, sizeof(struct my_syscall_info))) printk(KERN_INFO "Data read error!\n");
 			break;
+		default:
+			pr_info("Command not found!");
+			break;
 	}
 	return 0;
 }
 
 static struct file_operations fops = {
 	.owner          = THIS_MODULE,
-	.open           = driver_open,
-	.release        = driver_close,
 	.unlocked_ioctl = driver_ioctl,
 };
 

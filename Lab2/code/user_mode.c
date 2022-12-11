@@ -13,7 +13,7 @@ static void print_line(void) {
 	printf("________________________\n");
 }
 
-static void print_my_syscall_info(struct my_syscall_info* si) {
+static void print_my_syscall_info(const struct my_syscall_info* si) {
 	printf("\nSyscall_info:\n\n");
 	printf("sp %lld\n", si->sp);
 	printf("nr %d\n", si->data.nr);
@@ -21,7 +21,7 @@ static void print_my_syscall_info(struct my_syscall_info* si) {
 	for (int i = 0; i < 6; i++) printf("arg %d  0x%08X\n", i, (unsigned int) si->data.args[i]);
 }
 
-static void print_page(struct my_page* mp) {
+static void print_page(const struct my_page* mp) {
 	printf("\nPage:\n\n");
 	printf("flags: %ld\n", mp->flags);
 	printf("Virtual address: %ld\n", mp->vm_address);
@@ -35,6 +35,10 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 	int32_t pid = atoi(argv[1]);
+	if (pid < 1) {
+		printf("Pid can be only greater than 0\n");
+		return -1;
+	}
 	printf("\nOpening a driver...\n");
 	fd = open("/dev/etc_device", O_WRONLY);
 	if(fd < 0) {
